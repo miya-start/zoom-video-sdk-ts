@@ -23,17 +23,20 @@ const App: React.FC = () => {
   }, [client])
 
   const renderVideo = async (event: any) => {
-    const mediaStream = client.getMediaStream();
+    const mediaStream = client.getMediaStream()
     if (event.action === 'Start') {
-      const userVideo = await mediaStream.attachVideo(event.userId, VideoQuality.Video_1080P);
-      const videoPlayerContainer = document.createElement('video-player-container');
-      videoPlayerContainer.appendChild(userVideo);
-      videoRef.current?.appendChild(videoPlayerContainer);
+      const userVideo = await mediaStream.attachVideo(
+        event.userId,
+        VideoQuality.Video_1080P,
+      )
+      videoRef.current?.appendChild(userVideo)
     } else {
-      const element = await mediaStream.detachVideo(event.userId);
-      Array.isArray(element) ? element.forEach((el) => el.remove()) : element.remove();
+      const element = await mediaStream.detachVideo(event.userId)
+      Array.isArray(element)
+        ? element.forEach((el) => el.remove())
+        : element.remove()
     }
-  };
+  }
 
   const toggleVideo = async () => {
     const mediaStream = client.getMediaStream()
@@ -132,10 +135,7 @@ const App: React.FC = () => {
           </>
         )}
       </div>
-      <div
-        ref={videoRef}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-4/5 mx-auto mb-10"
-      ></div>
+      <video-player-container ref={videoRef}></video-player-container>
     </div>
   )
 }
