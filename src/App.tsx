@@ -121,7 +121,7 @@ const App: React.FC = () => {
   return (
     <div className="flex flex-col items-center">
       <h1 className="text-4xl font-bold text-center py-8">
-        Zoom VideoSDK Hello World
+        Zoom VideoSDK のデモ
       </h1>
       <div className="flex space-x-4 mb-4">
         {!isConnected ? (
@@ -129,7 +129,7 @@ const App: React.FC = () => {
             className="bg-blue-500 text-white font-bold text-lg py-4 px-8 rounded-md w-64"
             onClick={startCall}
           >
-            Join
+            参加
           </button>
         ) : (
           <>
@@ -137,19 +137,19 @@ const App: React.FC = () => {
               className="bg-blue-500 text-white font-bold text-lg py-4 px-8 rounded-md w-64"
               onClick={leaveCall}
             >
-              Leave
+              退出
             </button>
             <button
               className="bg-blue-500 text-white font-bold text-lg py-4 px-8 rounded-md w-64"
               onClick={toggleVideo}
             >
-              Toggle Video
+              ビデオのオン/オフ
             </button>
             <button
               className="bg-blue-500 text-white font-bold text-lg py-4 px-8 rounded-md w-64"
               onClick={toggleAudio}
             >
-              {isMuted ? 'Unmute' : 'Mute'}
+              {isMuted ? 'ミュート解除' : 'ミュート'}
             </button>
           </>
         )}
