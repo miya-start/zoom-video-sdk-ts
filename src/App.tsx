@@ -14,6 +14,7 @@ await client.init('ja-JP', 'Global', { patchJsMedia: true })
 
 const App: React.FC = () => {
   const [isConnected, setIsConnected] = React.useState(false)
+  const [isConnecting, setIsConnecting] = React.useState(false)
   const [isMuted, setIsMuted] = React.useState(false)
   const videoRef = React.useRef<HTMLDivElement>(null)
 
@@ -86,6 +87,7 @@ const App: React.FC = () => {
   }
 
   const startCall = async () => {
+    setIsConnecting(true)
     const token = generateSignature(topic, role, sdkKey, sdkSecret)
     client.on('peer-video-state-change', renderVideo)
     await client.join(topic, token, username)
@@ -98,6 +100,7 @@ const App: React.FC = () => {
       userId: client.getCurrentUserInfo().userId,
     })
     setIsConnected(true)
+    setIsConnecting(false)
 
     window.safari
       ? await UseWorkAroundForSafari(client)
@@ -128,8 +131,9 @@ const App: React.FC = () => {
           <button
             className="bg-blue-500 text-white font-bold text-lg py-4 px-8 rounded-md w-64"
             onClick={startCall}
+            disabled={isConnecting}
           >
-            参加
+            {isConnecting ? '接続中...' : '参加'}
           </button>
         ) : (
           <>
