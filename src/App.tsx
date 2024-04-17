@@ -9,34 +9,33 @@ const topic = 'SomeTopicName'
 const role = 1
 const username = `User-${new Date().getTime().toString().slice(6)}`
 
+const client = ZoomVideo.createClient()
+await client.init('ja-JP', 'Global', { patchJsMedia: true })
+
 const App: React.FC = () => {
   const [isConnected, setIsConnected] = React.useState(false)
   const videoRef = React.useRef<HTMLDivElement>(null)
 
-  const client = React.useMemo(() => ZoomVideo.createClient(), [])
-
-  React.useEffect(() => {
-    const initClient = async () => {
-      await client.init('ja-JP', 'Global', { patchJsMedia: true })
-    }
-    initClient()
-  }, [client])
-
-  const renderVideo = async (event: any) => {
-    const mediaStream = client.getMediaStream()
-    if (event.action === 'Start') {
-      const userVideo = await mediaStream.attachVideo(
-        event.userId,
-        VideoQuality.Video_1080P,
-      )
-      videoRef.current?.appendChild(userVideo)
-    } else {
-      const element = await mediaStream.detachVideo(event.userId)
-      Array.isArray(element)
-        ? element.forEach((el) => el.remove())
-        : element.remove()
-    }
-  }
+  const renderVideo = React.useCallback(
+    async (event: { action: string; userId: number }) => {
+      const mediaStream = client.getMediaStream()
+      if (event.action === 'Start') {
+        const userVideo = await mediaStream.attachVideo(
+          event.userId,
+          VideoQuality.Video_1080P,
+        )
+        if (userVideo instanceof HTMLElement) {
+          videoRef.current?.appendChild(userVideo)
+        }
+      } else {
+        const element = await mediaStream.detachVideo(event.userId)
+        Array.isArray(element)
+          ? element.forEach((el) => el.remove())
+          : element?.remove()
+      }
+    },
+    [],
+  )
 
   const toggleVideo = async () => {
     const mediaStream = client.getMediaStream()
