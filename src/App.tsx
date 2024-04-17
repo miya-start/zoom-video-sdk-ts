@@ -14,6 +14,7 @@ await client.init('ja-JP', 'Global', { patchJsMedia: true })
 
 const App: React.FC = () => {
   const [isConnected, setIsConnected] = React.useState(false)
+  const [isMuted, setIsMuted] = React.useState(false)
   const videoRef = React.useRef<HTMLDivElement>(null)
 
   const renderVideo = React.useCallback(
@@ -73,15 +74,23 @@ const App: React.FC = () => {
     })
   }
 
+  const toggleAudio = async () => {
+    const mediaStream = client.getMediaStream()
+    if (isMuted) {
+      await mediaStream.unmuteAudio()
+      setIsMuted(false)
+    } else {
+      await mediaStream.muteAudio()
+      setIsMuted(true)
+    }
+  }
+
   const startCall = async () => {
     const token = generateSignature(topic, role, sdkKey, sdkSecret)
     client.on('peer-video-state-change', renderVideo)
     await client.join(topic, token, username)
 
     const mediaStream = client.getMediaStream()
-    window.safari
-      ? await UseWorkAroundForSafari(client)
-      : await mediaStream.startAudio()
     await mediaStream.startVideo({ fullHd: true })
 
     await renderVideo({
@@ -89,6 +98,10 @@ const App: React.FC = () => {
       userId: client.getCurrentUserInfo().userId,
     })
     setIsConnected(true)
+
+    window.safari
+      ? await UseWorkAroundForSafari(client)
+      : await mediaStream.startAudio()
   }
 
   const leaveCall = async () => {
@@ -102,6 +115,7 @@ const App: React.FC = () => {
     }
     await client.leave()
     setIsConnected(false)
+    setIsMuted(false)
   }
 
   return (
@@ -130,6 +144,12 @@ const App: React.FC = () => {
               onClick={toggleVideo}
             >
               Toggle Video
+            </button>
+            <button
+              className="bg-blue-500 text-white font-bold text-lg py-4 px-8 rounded-md w-64"
+              onClick={toggleAudio}
+            >
+              {isMuted ? 'Unmute' : 'Mute'}
             </button>
           </>
         )}
