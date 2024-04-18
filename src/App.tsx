@@ -1,6 +1,10 @@
 import React from 'react'
 import ZoomVideo, { VideoQuality } from '@zoom/videosdk'
 import { generateSignature } from './utils'
+import headsetKittyBlack from './assets/headset-kitty-black.avif'
+import headsetKittyBlue from './assets/headset-kitty-blue.jpeg'
+import headsetKittyPink from './assets/headset-kitty-pink.avif'
+import qrcodeDummy from './assets/qrcode-dummy.png'
 
 const sdkKey = import.meta.env.VITE_SDK_KEY
 const sdkSecret = import.meta.env.VITE_SDK_SECRET
@@ -17,6 +21,15 @@ const App: React.FC = () => {
   const [isConnecting, setIsConnecting] = React.useState(false)
   const [isMuted, setIsMuted] = React.useState(false)
   const videoRef = React.useRef<HTMLDivElement>(null)
+  const [selectedGift, setSelectedGift] = React.useState<string | null>(null)
+
+  const openGiftModal = (giftId: string) => {
+    setSelectedGift(giftId)
+  }
+
+  const closeGiftModal = () => {
+    setSelectedGift(null)
+  }
 
   const renderVideo = React.useCallback(
     async (event: { action: string; userId: number }) => {
@@ -161,6 +174,78 @@ const App: React.FC = () => {
         )}
       </div>
       <video-player-container ref={videoRef}></video-player-container>
+
+      {isConnected && (
+        <div className="flex space-x-4 mt-4">
+          <div className="flex flex-col items-center">
+            <button
+              className=" text-white rounded-full p-4"
+              onClick={() => openGiftModal('headsetKittyPink')}
+            >
+              <img src={headsetKittyPink} alt="Gift 1" className="w-16 h-16" />
+            </button>
+            <span className="text-sm mt-1">ヘッドセット ピンク</span>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <button
+              className=" text-white rounded-full p-4"
+              onClick={() => openGiftModal('headsetKittyBlue')}
+            >
+              <img src={headsetKittyBlue} alt="Gift 1" className="w-16 h-16" />
+            </button>
+            <span className="text-sm mt-1">ヘッドセット ブルー</span>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <button
+              className=" text-white rounded-full p-4"
+              onClick={() => openGiftModal('headsetKittyBlack')}
+            >
+              <img src={headsetKittyBlack} alt="Gift 1" className="w-16 h-16" />
+            </button>
+            <span className="text-sm mt-1">ヘッドセット ブラック</span>
+          </div>
+        </div>
+      )}
+
+      {selectedGift && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="absolute inset-0 bg-gray-900 opacity-50"></div>
+          <div className="bg-white rounded-lg p-8 z-10">
+            <h2 className="text-2xl font-bold mb-4">ギフトを購入</h2>
+            <p className="mb-4 flex justify-center">
+              <img
+                src={
+                  selectedGift === 'headsetKittyPink'
+                    ? headsetKittyPink
+                    : selectedGift === 'headsetKittyBlue'
+                    ? headsetKittyBlue
+                    : headsetKittyBlack
+                }
+                alt={selectedGift}
+                className="w-32 h-32"
+              />
+            </p>
+            <p className="mb-4">
+              QRコードをスキャンして支払いを完了してください
+            </p>
+            <img
+              src={qrcodeDummy}
+              alt="QR Code for Payment"
+              className="w-64 h-64 mx-auto"
+            />
+            <div className="flex justify-end">
+              <button
+                className="bg-gray-500 text-white font-bold py-2 px-4 rounded mr-2"
+                onClick={closeGiftModal}
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
