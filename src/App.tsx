@@ -1,5 +1,5 @@
 import React from 'react'
-import ZoomVideo, { VideoQuality } from '@zoom/videosdk'
+import ZoomVideo, { VideoQuality, type MediaDevice } from '@zoom/videosdk'
 import { generateSignature } from './utils'
 import headsetKittyBlack from './assets/headset-kitty-black.avif'
 import headsetKittyBlue from './assets/headset-kitty-blue.jpeg'
@@ -22,6 +22,26 @@ const App: React.FC = () => {
   const [isMuted, setIsMuted] = React.useState(false)
   const videoRef = React.useRef<HTMLDivElement>(null)
   const [selectedGift, setSelectedGift] = React.useState<string | null>(null)
+  const [cameras, setCameras] = React.useState<MediaDevice[]>([])
+  const [selectedCamera, setSelectedCamera] = React.useState<string | null>(
+    null,
+  )
+
+  React.useEffect(() => {
+    const mediaStream = client.getMediaStream()
+    setCameras(mediaStream.getCameraList())
+
+    client.on('device-change', () => {
+      console.log(mediaStream.getCameraList())
+      setCameras(mediaStream.getCameraList())
+    })
+  }, [])
+
+  const switchCamera = async (deviceId: string) => {
+    const mediaStream = client.getMediaStream()
+    await mediaStream.switchCamera(deviceId)
+    setSelectedCamera(deviceId)
+  }
 
   const openGiftModal = (giftId: string) => {
     setSelectedGift(giftId)
@@ -51,23 +71,6 @@ const App: React.FC = () => {
     },
     [],
   )
-
-  const toggleVideo = async () => {
-    const mediaStream = client.getMediaStream()
-    if (mediaStream.isCapturingVideo()) {
-      await mediaStream.stopVideo()
-      await renderVideo({
-        action: 'Stop',
-        userId: client.getCurrentUserInfo().userId,
-      })
-    } else {
-      await mediaStream.startVideo({ fullHd: true })
-      await renderVideo({
-        action: 'Start',
-        userId: client.getCurrentUserInfo().userId,
-      })
-    }
-  }
 
   const UseWorkAroundForSafari = async (client: any) => {
     let audioDecode: boolean
@@ -158,18 +161,27 @@ const App: React.FC = () => {
             >
               退出
             </button>
-            <button
-              className="bg-blue-500 text-white font-bold text-lg py-4 px-8 rounded-md w-64"
-              onClick={toggleVideo}
-            >
-              ビデオのオン/オフ
-            </button>
+
             <button
               className="bg-blue-500 text-white font-bold text-lg py-4 px-8 rounded-md w-64"
               onClick={toggleAudio}
             >
               {isMuted ? 'ミュート解除' : 'ミュート'}
             </button>
+            <div className="flex flex-col items-center">
+              <select
+                className="bg-white text-black font-bold py-2 px-4 rounded"
+                value={selectedCamera || ''}
+                onChange={(e) => switchCamera(e.target.value)}
+              >
+                {cameras.map((camera) => (
+                  <option key={camera.deviceId} value={camera.deviceId}>
+                    {camera.label}
+                  </option>
+                ))}
+              </select>
+              <span className="text-sm mt-1">カメラの切り替え</span>
+            </div>
           </>
         )}
       </div>
