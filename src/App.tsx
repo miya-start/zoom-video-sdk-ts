@@ -60,7 +60,6 @@ const App: React.FC = () => {
     let audioDecode: boolean
     let audioEncode: boolean
     client.on('media-sdk-change', (payload: any) => {
-      console.log('media-sdk-change', payload)
       if (payload.type === 'audio' && payload.result === 'success') {
         if (payload.action === 'encode') {
           audioEncode = true
@@ -68,7 +67,6 @@ const App: React.FC = () => {
           audioDecode = true
         }
         if (audioEncode && audioDecode) {
-          console.log('start audio')
           client.getMediaStream().startAudio()
         }
       }
@@ -102,11 +100,15 @@ const App: React.FC = () => {
     setIsConnected(true)
     setIsConnecting(false)
 
-    window.safari
-      ? await UseWorkAroundForSafari(client)
-      : await mediaStream.startAudio()
+    if (
+      navigator.userAgent.indexOf('Safari') !== -1 &&
+      navigator.userAgent.indexOf('Chrome') === -1
+    ) {
+      await UseWorkAroundForSafari(client)
+    } else {
+      await mediaStream.startAudio()
+    }
   }
-
   const leaveCall = async () => {
     client.off('peer-video-state-change', renderVideo)
     const mediaStream = client.getMediaStream()
